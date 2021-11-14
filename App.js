@@ -1,13 +1,4 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, {Component} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -16,79 +7,93 @@ import {
   Text,
   useColorScheme,
   View,
+  FlatList,
+  Image,
+  Platform,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import Animated from 'react-native-reanimated';
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import {Icon} from 'react-native-elements';
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+const images = [
+  {id: 1, uri: require('./assets/img/pexels-andy-vu-3244513.jpg')},
+  {id: 2, uri: require('./assets/img/pexels-frans-van-heerden-624015.jpg')},
+  {id: 3, uri: require('./assets/img/pexels-ian-beckley-2440061.jpg')},
+  {id: 4, uri: require('./assets/img/pexels-jeremy-bishop-3464632.jpg')},
+  {id: 5, uri: require('./assets/img/pexels-s-migaj-1402850.jpg')},
+  {id: 6, uri: require('./assets/img/pexels-sam-kolder-2387873.jpg')},
+];
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+const HEADER_HEIGHT = Platform.OS == 'ios' ? 100 : 70 + StatusBar.currentHeight;
+const scrollY = new Animated.Value(0);
+const diffClampScrollHeight = Animated.diffClamp(scrollY, 0, HEADER_HEIGHT);
+const headerY = Animated.interpolateNode(diffClampScrollHeight, {
+  inputRange: [0, HEADER_HEIGHT],
+  outputRange: [0, -HEADER_HEIGHT],
+});
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
+class App extends Component {
+  render() {
+    return (
+      <SafeAreaView style={{flex: 1}}>
+        <Animated.View
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            right: 0,
+            height: HEADER_HEIGHT,
+            backgroundColor: '#4B5320',
+            zIndex: 1000,
+            elevation: 1000,
+            transform: [{translateY: headerY}],
+            justifyContent: 'space-around',
+            alignItems: 'center',
+            paddingTop: 25,
+            flexDirection: 'row',
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+          <Icon
+            name={'arrow-back'}
+            type="ionicon"
+            fontSize={24}
+            color={'white'}
+          />
+          <Text style={{fontSize: 22, color: 'white'}}>Nature Photos</Text>
+
+          <Icon
+            name={'ellipsis-vertical'}
+            type="ionicon"
+            fontSize={24}
+            color={'white'}
+          />
+        </Animated.View>
+        <Animated.ScrollView
+          bounces={false}
+          scrollEventThrottle={16}
+          style={{paddingTop: HEADER_HEIGHT - 30}}
+          onScroll={Animated.event([
+            {nativeEvent: {contentOffset: {y: scrollY}}},
+          ])}>
+          {images.map(image => (
+            <View
+              key={image.id}
+              style={{height: 400, margin: 20, borderRadius: 20}}>
+              <Image
+                source={image.uri}
+                style={{
+                  flex: 1,
+                  height: null,
+                  width: null,
+                  borderRadius: 20,
+                }}></Image>
+            </View>
+          ))}
+        </Animated.ScrollView>
+      </SafeAreaView>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   sectionContainer: {
